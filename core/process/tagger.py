@@ -1,6 +1,6 @@
 import os
 
-from mutagen.mp4 import MP4, MP4Cover
+from mutagen.mp4 import MP4, MP4Cover, MP4FreeForm
 from sanitize_filename import sanitize
 
 from utils import logger
@@ -47,11 +47,20 @@ def tag(
 
     if "credits" in data:
         for k, v in data["credits"].items():
+            ascii_key = k.encode('ascii', 'ignore').decode('ascii').strip()
+            if not ascii_key:
+                ascii_key = "Unknown"
             __tags[f'----:com.apple.itunes:{k}'] = v
 
     if data["type"] == 6:
         del __tags["trkn"]
         del __tags["disk"]
+    for key, value in __tags.copy().items():  # 使用.copy()避免迭代中修改字典
+        try:
+            key.encode('latin-1')
+        except UnicodeEncodeError:
+            logger.warning(f"Skipping invalid key (non-latin1): {key}")
+            del __tags[key] 
 
     for key, value in __tags.items():
         if value:
@@ -59,12 +68,12 @@ def tag(
                 value = ['\r\n'.join(value)]
                 
                 if key.startswith("----:com.apple.itunes:"):
-                    value = [val.encode() for val in value]
+                    value = [MP4FreeForm(val.encode('utf-8')) for val in value]
 
                 tags[key] = value
             else:
                 if key.startswith("----:com.apple.itunes:"):
-                    value = value.encode()
+                    value = value.encode('utf-8')
                 
                 if key in [
                     "aART",

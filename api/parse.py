@@ -20,7 +20,7 @@ def parseJson(data, sync: int, skipVideo=False):
 
             song["type"] = 1
             song["album"] = attr["albumName"]
-            song["genre"] = attr["genreNames"]
+            song["genre"] = attr["genreNames"][0]
             song["trackno"] = attr["trackNumber"]
             song["releasedate"] = attr["releaseDate"]
             song["isrc"] = attr["isrc"]
@@ -34,23 +34,18 @@ def parseJson(data, sync: int, skipVideo=False):
             rela = item["relationships"]
 
             if "credits" in rela:
-                credits = rela["credits"]["data"]
+                credits = item["relationships"]["credits"]["data"]
                 if credits:
-
-                    roles = []
                     creds = {}
-
-                    for catagory in credits:
-                        for credit in catagory["relationships"]["credit-artists"]["data"]:
-                            for role in credit["attributes"]["roleNames"]:
-                                if not role in roles:
-                                    roles.append(role)
-                                    creds[role] = [credit["attributes"]["name"]]
+                    for category in credits:
+                        for credit in category["relationships"]["credit-artists"]["data"]:
+                            role_names = credit["attributes"]["roleNames"]
+                            artist_name = credit["attributes"]["name"]
+                            for role in role_names:
+                                if role not in creds:
+                                    creds[role] = [artist_name]
                                 else:
-                                    roleArtist: list = creds[role]
-                                    roleArtist.append(credit["attributes"]["name"])
-                                    creds[role] = roleArtist
-
+                                    creds[role].append(artist_name)
                     song["credits"] = creds
 
             if "lyrics" in rela:

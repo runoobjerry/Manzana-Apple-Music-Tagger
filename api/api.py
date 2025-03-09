@@ -146,8 +146,8 @@ class AppleMusic(object):
                 logger.error("Invalid media-user-token! Passing over the user subscription...")
                 self.__config.delete('mediaUserToken')
         else:
-            self.storefront = 'us'
-            self.language = 'en-US'
+            self.storefront = 'cn'
+            self.language = 'zh-Hans-CN'
             self.isMediaUserToken = False
 
     def __getErrors(self, errors):
@@ -158,60 +158,108 @@ class AppleMusic(object):
             err_detail = error.get("detail")
             logger.error(f"{err_status} - {err_detail}", 1)
 
-    def __getJson(self):
-        logger.info("Fetching api response...")
+    def __getJson(self, storefront=None):
+        """获取指定storefront的API数据"""
+        original_storefront = self.storefront
+        original_language = self.language
 
-        cacheKey = f"{self.id}:{self.storefront}"
-        __cache = self.__cache.get(cacheKey)
-
-        if __cache:
-            logger.info("Using the previous response found in cache...")
-            return __cache
+        # 临时切换storefront和language
+        if storefront:
+            self.storefront = storefront
+            self.language = 'en-US' if storefront == 'us' else 'en-GB'
 
         apiUrl = f'https://amp-api.music.apple.com/v1/catalog/{self.storefront}/{self.kind}s/{self.id}'
-
-        if self.kind == "album" or self.kind == "song":
+        
+        # 参数逻辑（根据kind调整）
+        if self.kind in ["album", "song"]:
             params = {
                 'extend': 'editorialVideo',
                 'include[songs]': 'albums,lyrics,credits',
-                'l': f'{self.language}'
+                'l': self.language
             }
-
         elif self.kind == "music-video":
-            params = {
-                'l': f'{self.language}'
-            }
+            params = {'l': self.language}
 
         self.session.params = params
 
-        response = json.loads(
-            self.session.get(
-                apiUrl
-            ).text
-        )
+        # 发送请求
+        response = self.session.get(apiUrl)
+        response_data = json.loads(response.text)
 
-        if not "errors" in response:
-            self.__cache.set(cacheKey, response)
-            return response
+        # 恢复原始storefront和language
+        if storefront:
+            self.storefront = original_storefront
+            self.language = original_language
+
+        if "errors" in response_data:
+            self.__getErrors(response_data)
         else:
-            self.__getErrors(response)
+            cacheKey = f"{self.id}:{storefront}" if storefront else f"{self.id}:{original_storefront}"
+            self.__cache.set(cacheKey, response_data)
+            return response_data
 
     def getInfo(self, url):
         self.__getUrl(url)
 
+        # 第一次请求：用户指定地区的API（获取常规标签和Credits的值）
+        local_data = self.__getJson()
+
+        # 第二次请求：US地区的API（仅获取Credits的键名）
+        us_data = self.__getJson(storefront='us')
+
+        # 合并Credits的键名和值
+        if self.kind == "song":
+            local_credits = local_data["data"][0]["relationships"].get("credits", {}).get("data", [])
+            us_credits = us_data["data"][0]["relationships"].get("credits", {}).get("data", [])
+            merged_credits = self.__merge_credits(local_credits, us_credits)
+            local_data["data"][0]["relationships"]["credits"]["data"] = merged_credits
+        elif self.kind == "album":
+            local_tracks = local_data["data"][0]["relationships"]["tracks"]["data"]
+            us_tracks = us_data["data"][0]["relationships"]["tracks"]["data"]
+            for local_track, us_track in zip(local_tracks, us_tracks):
+                local_credits = local_track["relationships"].get("credits", {}).get("data", [])
+                us_credits = us_track["relationships"].get("credits", {}).get("data", [])
+                merged_credits = self.__merge_credits(local_credits, us_credits)
+                local_track["relationships"]["credits"]["data"] = merged_credits
+
+        # 传递给parseJson处理
         if self.kind == "album":
             return parseJson(
-                self.__getJson()["data"][0]["relationships"]["tracks"]["data"],
+                local_data["data"][0]["relationships"]["tracks"]["data"],
                 self.sync,
                 self.skipVideo
             )
         elif self.kind == "song":
             return parseJson(
-                self.__getJson()["data"],
+                local_data["data"],
                 self.sync
             )
         elif self.kind == "music-video":
             return parseJson(
-                self.__getJson()["data"],
+                local_data["data"],
                 self.sync
             )
+    def __merge_credits(self, local_credits, us_credits):
+        merged = []
+        # 构建US Credits的艺术家ID到角色名的映射
+        us_role_map = {}
+        for category in us_credits:
+            for credit in category["relationships"]["credit-artists"]["data"]:
+                artist_id = credit["id"]
+                us_role_map[artist_id] = credit["attributes"]["roleNames"]
+        # 合并数据
+        for category in local_credits:
+            new_category = {"relationships": {"credit-artists": {"data": []}}}
+            for credit in category["relationships"]["credit-artists"]["data"]:
+                artist_id = credit["id"]
+                # 使用US的键名，保留本地的艺术家名称
+                merged_credit = {
+                    "id": artist_id,
+                    "attributes": {
+                        "name": credit["attributes"]["name"],
+                        "roleNames": us_role_map.get(artist_id, ["Unknown"])
+                    }
+                }
+                new_category["relationships"]["credit-artists"]["data"].append(merged_credit)
+            merged.append(new_category)
+        return merged
