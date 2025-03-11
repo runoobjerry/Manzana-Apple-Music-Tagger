@@ -143,8 +143,12 @@ Get your Apple Music cookies from web browser and search for `media-user-token` 
 |.music.apple.com|TRUE|/|TRUE|1681361859|itua|##|
 
 You need to add `mediaUserToken` to get `lyricist` and `lyrics` and also to save `timeSyncedLyrics` as a `.lrc` file.<br>
-Program will ask you for the `mediaUserToken` when you run it. If you don't want to use subscription, you can skip that by hitting `Enter` key.
-If you want to use subscription, run below command to clear the configuration and run the program again.
+
+Please create a txt file named mediaUserToken in the `\utils` folder, and fill in the token you got on the web page, the program will automatically read the token in it.
+
+Program will ask you for the `storefront` and `language` when you run it. You can fill in the metadata for the region and language you want to obtain.
+
+If you want to change the language and mediaUserToken , run below command to clear the configuration and run the program again.
 
 ```
 python manzana.py reset
@@ -160,12 +164,6 @@ If you don't want to get time synced lyrics as `.lrc` file, use `--no-lrc` argum
 
 ```
 python manzana.py --no-lrc [album or song url]
-```
-
-If you don't want to use your subscription anymore use below command again to reset and skip when it ask for `mediaUserToken`.
-
-```
-python manzana.py reset
 ```
 
 ### Sample
