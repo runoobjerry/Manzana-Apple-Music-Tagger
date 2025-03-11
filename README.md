@@ -28,7 +28,7 @@ A python program to fetch credits info from apple music about albums, songs and 
 First of all clone this project or download the project as a zip file and extract it to your pc. (or you can see [Releases](https://github.com/dropcreations/Manzana-Apple-Music-Tagger/releases))
 
 ```
-git clone https://github.com/dropcreations/Manzana-Apple-Music-Tagger.git && cd Manzana-Apple-Music-Tagger
+git clone https://github.com/runoobjerry/Manzana-Apple-Music-Tagger.git && cd Manzana-Apple-Music-Tagger
 ```
 
 Install required modules for python (use `pip3` if `pip` doesn't work for you)
@@ -144,11 +144,11 @@ Get your Apple Music cookies from web browser and search for `media-user-token` 
 
 You need to add `mediaUserToken` to get `lyricist` and `lyrics` and also to save `timeSyncedLyrics` as a `.lrc` file.<br>
 
-Please create a txt file named mediaUserToken in the `\utils` folder, and fill in the token you got on the web page, the program will automatically read the token in it.
+Please create a `txt` file named `mediaUserToken` in the `\utils` folder, and fill in the token you got on the web page, the program will automatically read the token in it.
 
 Program will ask you for the `storefront` and `language` when you run it. You can fill in the metadata for the region and language you want to obtain.
 
-If you want to change the language and mediaUserToken , run below command to clear the configuration and run the program again.
+If you want to change the `language` or `mediaUserToken` , run below command to clear the configuration and run the program again.
 
 ```
 python manzana.py reset
