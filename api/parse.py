@@ -24,7 +24,7 @@ def parseJson(data, sync: int, skipVideo=False):
             song["trackno"] = attr["trackNumber"]
             song["releasedate"] = attr["releaseDate"]
             song["isrc"] = attr["isrc"]
-            song["composer"] = attr["composerName"]
+            song["composer"] = attr.get("composerName")
             song["discno"] = attr["discNumber"]
             song["song"] = attr["name"]
             song["songartist"] = attr["artistName"]
@@ -41,7 +41,10 @@ def parseJson(data, sync: int, skipVideo=False):
                         for credit in category["relationships"]["credit-artists"]["data"]:
                             role_names = credit["attributes"]["roleNames"]
                             artist_name = credit["attributes"]["name"]
+
                             for role in role_names:
+                                if role == "Composer":
+                                    continue
                                 if role not in creds:
                                     creds[role] = [artist_name]
                                 else:
@@ -118,3 +121,4 @@ def parseJson(data, sync: int, skipVideo=False):
 
     media["streams"] = mediaList
     return media
+    

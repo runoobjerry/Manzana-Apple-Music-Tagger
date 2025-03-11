@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 from urllib.request import urlopen
 from urllib.error import URLError, HTTPError
 
+
 from utils import Cache
 from utils import Config
 from utils import logger
@@ -31,6 +32,9 @@ class AppleMusic(object):
 
         self.sync = int(sync)
         self.skipVideo = skipVideo
+
+        self.storefront = self.__config.get('storeFront') or 'us'
+        self.language = self.__config.get('language') or 'en-US'
 
         self.__accessToken()
         self.__mediaUserToken()
@@ -132,8 +136,8 @@ class AppleMusic(object):
             if response.status_code == 200:
                 response = json.loads(response.text)
 
-                self.storefront = response["data"][0]["id"]
-                self.language = response["data"][0]["attributes"]["defaultLanguageTag"]
+                self.token_storefront = response["data"][0]["id"]
+                self.token_language = response["data"][0]["attributes"]["defaultLanguageTag"]
 
                 self.session.headers.update(
                     {
@@ -146,8 +150,8 @@ class AppleMusic(object):
                 logger.error("Invalid media-user-token! Passing over the user subscription...")
                 self.__config.delete('mediaUserToken')
         else:
-            self.storefront = 'cn'
-            self.language = 'zh-Hans-CN'
+        ##    self.storefront = 'sg'
+        ##    self.language = 'zh-Hans-CN'
             self.isMediaUserToken = False
 
     def __getErrors(self, errors):
@@ -159,7 +163,7 @@ class AppleMusic(object):
             logger.error(f"{err_status} - {err_detail}", 1)
 
     def __getJson(self, storefront=None):
-        """获取指定storefront的API数据"""
+        # 获取指定storefront的API数据
         original_storefront = self.storefront
         original_language = self.language
 
@@ -196,68 +200,99 @@ class AppleMusic(object):
         else:
             cacheKey = f"{self.id}:{storefront}" if storefront else f"{self.id}:{original_storefront}"
             self.__cache.set(cacheKey, response_data)
+
             return response_data
 
     def getInfo(self, url):
         self.__getUrl(url)
 
-        # 第一次请求：用户指定地区的API（获取常规标签和Credits的值）
-        local_data = self.__getJson()
+        original_storefront = self.storefront
+        original_language = self.language
 
-        # 第二次请求：US地区的API（仅获取Credits的键名）
+        local_data = self.__getJson()
         us_data = self.__getJson(storefront='us')
 
-        # 合并Credits的键名和值
-        if self.kind == "song":
-            local_credits = local_data["data"][0]["relationships"].get("credits", {}).get("data", [])
-            us_credits = us_data["data"][0]["relationships"].get("credits", {}).get("data", [])
-            merged_credits = self.__merge_credits(local_credits, us_credits)
-            local_data["data"][0]["relationships"]["credits"]["data"] = merged_credits
-        elif self.kind == "album":
-            local_tracks = local_data["data"][0]["relationships"]["tracks"]["data"]
-            us_tracks = us_data["data"][0]["relationships"]["tracks"]["data"]
-            for local_track, us_track in zip(local_tracks, us_tracks):
-                local_credits = local_track["relationships"].get("credits", {}).get("data", [])
-                us_credits = us_track["relationships"].get("credits", {}).get("data", [])
-                merged_credits = self.__merge_credits(local_credits, us_credits)
-                local_track["relationships"]["credits"]["data"] = merged_credits
+        lyrics_data = None
+        if self.isMediaUserToken:
+            # 临时切换storefront和language
+            self.storefront = self.token_storefront  
+            self.language = self.token_language      
+            lyrics_data = self.__getJson()
+            # 恢复原始设置
+            self.storefront = original_storefront
+            self.language = original_language
 
-        # 传递给parseJson处理
+        # 合并credits
+        if self.kind == "song":
+            local_data = self.__merge_lyrics(local_data, us_data, lyrics_data)
+        elif self.kind == "album":
+            local_data = self.__merge_album_data(local_data, us_data, lyrics_data)
+
+        return self.__prepare_for_parse(local_data)
+
+    
+    def __merge_lyrics(self, local_data, us_data, lyrics_data):
+        # 合并credits
+        local_credits = local_data["data"][0]["relationships"].get("credits", {}).get("data", [])
+        us_credits = us_data["data"][0]["relationships"].get("credits", {}).get("data", [])
+        local_data["data"][0]["relationships"]["credits"]["data"] = self.__merge_credits(local_credits, us_credits)
+        
+        # 优先使用lyrics_data的歌词
+        if lyrics_data and "lyrics" in lyrics_data["data"][0]["relationships"]:
+            local_data["data"][0]["relationships"]["lyrics"] = lyrics_data["data"][0]["relationships"]["lyrics"]
+        return local_data
+    
+    def __prepare_for_parse(self, data):
+        # 保持原有结构但包含合并后的歌词
         if self.kind == "album":
             return parseJson(
-                local_data["data"][0]["relationships"]["tracks"]["data"],
+                data["data"][0]["relationships"]["tracks"]["data"],
                 self.sync,
                 self.skipVideo
             )
-        elif self.kind == "song":
+        else:
             return parseJson(
-                local_data["data"],
+                data["data"],
                 self.sync
             )
-        elif self.kind == "music-video":
-            return parseJson(
-                local_data["data"],
-                self.sync
-            )
+        
+    def __merge_album_data(self, local_data, us_data, lyrics_data):
+        # 专辑需要逐曲目合并
+        for i in range(len(local_data["data"][0]["relationships"]["tracks"]["data"])):
+            # 合并credits
+            local_track = local_data["data"][0]["relationships"]["tracks"]["data"][i]
+            us_track = us_data["data"][0]["relationships"]["tracks"]["data"][i]
+            local_credits = local_track["relationships"].get("credits", {}).get("data", [])
+            us_credits = us_track["relationships"].get("credits", {}).get("data", [])
+            local_track["relationships"]["credits"]["data"] = self.__merge_credits(local_credits, us_credits)
+            
+            # 合并歌词（需要匹配曲目ID）
+            if lyrics_data:
+                lyrics_track = next((t for t in lyrics_data["data"][0]["relationships"]["tracks"]["data"] 
+                                   if t["id"] == local_track["id"]), None)
+                if lyrics_track and "lyrics" in lyrics_track["relationships"]:
+                    local_track["relationships"]["lyrics"] = lyrics_track["relationships"]["lyrics"]
+        return local_data
+    
     def __merge_credits(self, local_credits, us_credits):
         merged = []
         # 构建US Credits的艺术家ID到角色名的映射
         us_role_map = {}
         for category in us_credits:
             for credit in category["relationships"]["credit-artists"]["data"]:
-                artist_id = credit["id"]
-                us_role_map[artist_id] = credit["attributes"]["roleNames"]
+                role_id = credit["id"]
+                us_role_map[role_id] = credit["attributes"]["roleNames"]
         # 合并数据
         for category in local_credits:
             new_category = {"relationships": {"credit-artists": {"data": []}}}
             for credit in category["relationships"]["credit-artists"]["data"]:
-                artist_id = credit["id"]
+                role_id = credit["id"]
                 # 使用US的键名，保留本地的艺术家名称
                 merged_credit = {
-                    "id": artist_id,
+                    "id": role_id,
                     "attributes": {
                         "name": credit["attributes"]["name"],
-                        "roleNames": us_role_map.get(artist_id, ["Unknown"])
+                        "roleNames": us_role_map.get(role_id, ["Unknown"])
                     }
                 }
                 new_category["relationships"]["credit-artists"]["data"].append(merged_credit)

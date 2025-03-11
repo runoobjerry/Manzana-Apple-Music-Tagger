@@ -36,31 +36,22 @@ def tag(
         "\xa9day": data.get("releasedate"),
         "cprt": data.get("copyright"),
         "stik": data.get("type"),
-        "\xa9lyr": data.get("lyrics"),
+        # "\xa9lyr": data.get("lyrics"),
         "trkn": (data.get("trackno"), data.get("trackcount")),
         "disk": (data.get("discno"), data.get("discno")),
         "----:com.apple.itunes:Label": data.get("recordlabel"),
         "----:com.apple.itunes:ISRC": data.get("isrc"),
         "----:com.apple.itunes:UPC": data.get("upc"),
-        "----:com.apple.itunes:Lyricist": data.get("songwriter"),
+        "----:com.apple.itunes:Lyricist": data.get("songwriter") ## or data.get("lyricist"),
     }
 
     if "credits" in data:
         for k, v in data["credits"].items():
-            ascii_key = k.encode('ascii', 'ignore').decode('ascii').strip()
-            if not ascii_key:
-                ascii_key = "Unknown"
             __tags[f'----:com.apple.itunes:{k}'] = v
 
     if data["type"] == 6:
         del __tags["trkn"]
         del __tags["disk"]
-    for key, value in __tags.copy().items():  # 使用.copy()避免迭代中修改字典
-        try:
-            key.encode('latin-1')
-        except UnicodeEncodeError:
-            logger.warning(f"Skipping invalid key (non-latin1): {key}")
-            del __tags[key] 
 
     for key, value in __tags.items():
         if value:
