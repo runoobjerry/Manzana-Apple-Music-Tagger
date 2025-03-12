@@ -1,4 +1,4 @@
-# __Manzana Apple Music Tagger__
+# __Manzana Apple Music Tagger Enhanced__
 
 A python program to fetch credits info from apple music about albums, songs and music-videos and tag MP4 and M4A files using those credits info.
 
@@ -17,6 +17,12 @@ A python program to fetch credits info from apple music about albums, songs and 
 - Also tags the lyrics to the media file if available
 - Adds newly released role-credits.
 
+## __Enhancements__  
+
+- Added support for fetching song metadata by specific `storefront` and `language`.  
+- Optimized the `mediausertoken` acquisition method.  
+- Fixed duplicate data bugs.
+  
 ## __Required__
 
 - [MP4Box](https://gpac.wp.imt.fr/downloads/)
@@ -210,23 +216,6 @@ Engineer                                 : 陶喆 / Craig Burbidge
 Vocal Producer                           : 陶喆 / 王治平 / 李咏恩
 ```
 
-## About me
+## About
 
-Hi, You might recognize me as GitHub's [dropcreations](https://github.com/dropcreations).
-
-__Other useful python scripts done by me__
-
-| Project        | Github location                                |
-|----------------|------------------------------------------------|
-| mkvextractor   | https://github.com/dropcreations/mkvextractor  |
-| flactagger     | https://github.com/dropcreations/flactagger    |
-| mp4tagger      | https://github.com/dropcreations/mp4tagger     |
-| mkvtagger      | https://github.com/dropcreations/mkvtagger     |
-
-<br>
-
-- __NOTE: If you found any issue using this program, mention in issues section__
-
-## Support
-
-[!["Buy Me A Coffee"](https://az743702.vo.msecnd.net/cdn/kofi3.png?v=0)](https://ko-fi.com/dropcodes)
+This project is a modified and optimized version of the original work by [dropcreations](https://github.com/dropcreations). You can support the original author by visiting his [project](https://github.com/dropcreations/Manzana-Apple-Music-Tagger).
