@@ -43,7 +43,7 @@ def parseJson(data, sync: int, skipVideo=False):
                             artist_name = credit["attributes"]["name"]
 
                             for role in role_names:
-                                if role == "Composer":
+                                if role in ["Composer", "Lyrics"]: #过滤掉多余的 role
                                     continue
                                 if role not in creds:
                                     creds[role] = [artist_name]

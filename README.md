@@ -169,49 +169,45 @@ python manzana.py --no-lrc [album or song url]
 ### Sample
 
 ```
-Format                      : MPEG-4
-Format profile              : Apple audio with iTunes info
-Codec ID                    : M4A  (isom/M4A /mp42)
-File size                   : 9.12 MiB
-Duration                    : 2 min 54 s
-Overall bit rate mode       : Variable
-Overall bit rate            : 438 kb/s
-Album                       : AUSTIN
-Album/Performer             : Post Malone
-Part/Position               : 1
-Part/Total                  : 1
-Track name                  : Something Real
-Track name/Position         : 2
-Track name/Total            : 17
-Performer                   : Post Malone
-Composer                    : Post Malone / Louis Bell / Andrew Watt / Billy Walsh
-Lyricist                    : Andrew Watt / Billy Walsh / Louis Bell / Post Malone
-Producer                    : Post Malone / Louis Bell / Andrew Watt
-Label                       : Mercury Records/Republic Records
-Genre                       : Pop / Music
-ContentType                 : Music
-Recorded date               : 2023-07-28
-Encoded date                : 2023-06-16 04:29:22 UTC
-Tagged date                 : 2023-06-16 04:29:22 UTC
-ISRC                        : USUM72306013
-Copyright                   : ℗ 2023 Mercury Records/Republic Records, a division of UMG Recordings, Inc.
-Cover                       : Yes
-Lyrics                      : Gimme something I can feel / Light a cigarette just so I can breathe / Gimme something, something real / Seven hundred feet off the coast of Greece / Gimme something I can feel / No reservation, pull up twenty deep / Gimme something, something real / I would trade it all just to be at peace / Stop, the gear's too high, this is overload / It don't matter what car is sittin' outside, it's a lonely road / It's a double-edged sword, cuttin' off ties with the ones I know / So tell me, how the fuck am I still alive? It's a miracle / And I can't believe, ran through a B at Louis V / It's what I need right now / It's just my need, at the gates of hell, no VIP / Everybody waits in line / So gimme something I can feel / 720S, 750 V / Gimme something, something real / I was in Maldives, sippin' burgundy / Gimme something I can feel / Prada on my dick, Prada on my sleeve / Gimme something, something real / I could play that pussy like it's "Für Elise" / I got real habits, I'm a snowmobile addict / Teal Patek steel when I feel panic / Throw a mil' at it, problem, throw a bill at it / Still at it, sign-another-deal addict / And I can't believe everybody gets to drink for free / So give me one more round / No cover fee at the gates of hell, no VIP / Everybody waits in line / So gimme something I can feel / Light a cigarette just so I can breathe / Gimme something, something real / How much psilocybin can a human eat? / Gimme something I can feel / Whiskey lullaby just to fall asleep / Gimme something, something real / And it's what I want, it ain't what I need / Gimme something I can feel / Got everything, guess I'm hard to please / Gimme something, something real / I would trade my life just to be at peace / Gimme something I can feel / Gimme something, something real
-Rating                      : Explicit
-Keyboards                   : Louis Bell
-Piano                       : Louis Bell
-Programming                 : Louis Bell
-Mastering Engineer          : Mike Bozzi
-Drums                       : Andrew Watt
-Choir Arranger              : Andrew Watt
-Lead Vocals                 : Post Malone
-Mixing Engineer             : Spike Stent
-UPC                         : 00602455789501
-Guitar                      : Post Malone / Andrew Watt
-Recording Engineer          : Marco Sonzini / Paul Lamalfa
-Songwriter                  : Louis Bell / Austin Post / Andrew Watt / Billy Walsh
-Assistant Recording Enginee : Jed Jones / Joe Dougherty / Tommy Turner / Braden Bursteen
-Choir                       : James Connor / Alexandria Griffin / Amanda Adams / Anthony Jawan / Brooke Brewer / Carl Foster / Chelsea West / Dwanna Orange / Herman Bryant III / Jajuan Glasper / Jasmine Patton / Jason White / Jerel Duren / JeRonelle McGhee / Kristin-Ilycia Lowe / Lanita Smith / Michael Adkins / Nelle Rose / Nikisha Grier / Ashly Williams / Carmel Echols / George Hamilton / Chelsea Miller / Jason McGee / Cassandra Chism / Natalie LaFourche / Tiffany Commons / Teresa Davis / Taneka Lemle / Brianna Lankford / Anthony Johnson / Zachary Moore / Vernon Burris / Michael Essex / Derrick Jenkins / Marquee Perkins / Camille Grigsby / Nicole Stevens / Quishima Dixon / Skyler Pugh / Shannon Pierre / Corinthian Buffington / Phylicia Hill
+Format                                   : MPEG-4
+Format profile                           : Apple audio with iTunes info
+Codec ID                                 : M4A  (isom/iso5/hlsf/cmfc/ccea/M4A /mp42)
+File size                                : 32.5 MiB
+Duration                                 : 4 分 55 秒
+Overall bit rate mode                    : 动态码率 (VBR)
+Overall bit rate                         : 921 kb/s
+Album                                    : I'm O.K.
+Album/Performer                          : 陶喆
+Part/Position                            : 1
+Part/Total                               : 1
+Track name                               : 小镇姑娘
+Track name/Position                      : 3
+Track name/Total                         : 13
+Performer                                : 陶喆
+Composer                                 : 陶喆
+Arranger                                 : 陶喆
+Lyricist                                 : 陶喆
+Producer                                 : 陶喆
+Label                                    : Gold Typhoon Taiwan
+Genre                                    : 国语流行
+ContentType                              : Music
+Recorded date                            : 1999-08-24
+Encoded date                             : 2022-03-01 02:45:32 UTC
+Tagged date                              : 2022-03-01 02:45:33 UTC
+ISRC                                     : TWC219900003
+Copyright                                : ℗ 1999 Gold Typhoon Music Co. Ltd.
+Cover                                    : Yes
+UPC                                      : 825646245383
+Guitar                                   : Bruce Watson
+Mixing Engineer                          : Craig Burbidge
+Bass                                     : Reggie Hamilton
+Background Vocals                        : 陶喆
+Lead Vocals                              : 陶喆
+Programming                              : 陶喆
+Other Instrument                         : 陶喆
+Mastering Engineer                       : Maggie Chen / Stephen Marcussen
+Engineer                                 : 陶喆 / Craig Burbidge
+Vocal Producer                           : 陶喆 / 王治平 / 李咏恩
 ```
 
 ## About me
