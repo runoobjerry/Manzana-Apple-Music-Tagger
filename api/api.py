@@ -232,10 +232,9 @@ class AppleMusic(object):
 
     
     def __merge_lyrics(self, local_data, us_data, lyrics_data):
-        # 合并credits
-        local_credits = local_data["data"][0]["relationships"].get("credits", {}).get("data", [])
-        us_credits = us_data["data"][0]["relationships"].get("credits", {}).get("data", [])
-        local_data["data"][0]["relationships"]["credits"]["data"] = self.__merge_credits(local_credits, us_credits)
+        local_credits = self.__get_credits(local_data["data"][0])  
+        us_credits = self.__get_credits(us_data["data"][0])        
+        local_data["data"][0]["relationships"]["credits"] = {"data": self.__merge_credits(local_credits, us_credits)}
         
         # 优先使用lyrics_data的歌词
         if lyrics_data and "lyrics" in lyrics_data["data"][0]["relationships"]:
@@ -262,16 +261,21 @@ class AppleMusic(object):
             # 合并credits
             local_track = local_data["data"][0]["relationships"]["tracks"]["data"][i]
             us_track = us_data["data"][0]["relationships"]["tracks"]["data"][i]
-            local_credits = local_track["relationships"].get("credits", {}).get("data", [])
-            us_credits = us_track["relationships"].get("credits", {}).get("data", [])
-            local_track["relationships"]["credits"]["data"] = self.__merge_credits(local_credits, us_credits)
+            
+            if "relationships" not in local_track:
+                local_track["relationships"] = {}
+
+            local_credits = self.__get_credits(local_track)
+            us_credits = self.__get_credits(us_track)
+            local_track["relationships"]["credits"] = {"data": self.__merge_credits(local_credits, us_credits)}
             
             # 合并歌词（需要匹配曲目ID）
             if lyrics_data:
                 lyrics_track = next((t for t in lyrics_data["data"][0]["relationships"]["tracks"]["data"] 
                                    if t["id"] == local_track["id"]), None)
-                if lyrics_track and "lyrics" in lyrics_track["relationships"]:
+                if lyrics_track and lyrics_track.get("relationships") and "lyrics" in lyrics_track["relationships"]:
                     local_track["relationships"]["lyrics"] = lyrics_track["relationships"]["lyrics"]
+        
         return local_data
     
     def __merge_credits(self, local_credits, us_credits):
@@ -298,3 +302,7 @@ class AppleMusic(object):
                 new_category["relationships"]["credit-artists"]["data"].append(merged_credit)
             merged.append(new_category)
         return merged
+    
+    def __get_credits(self, data):
+        """兼容新旧专辑结构获取 credits"""
+        return data.get("relationships", {}).get("credits", {}).get("data", []) or data.get("credits", {}).get("data", [])

@@ -31,10 +31,10 @@ A python program to fetch credits info from apple music about albums, songs and 
 
 ### __# for all users__
 
-First of all clone this project or download the project as a zip file and extract it to your pc. (or you can see [Releases](https://github.com/dropcreations/Manzana-Apple-Music-Tagger/releases))
+First of all clone this project or download the project as a zip file and extract it to your pc.
 
 ```
-git clone https://github.com/runoobjerry/Manzana-Apple-Music-Tagger.git && cd Manzana-Apple-Music-Tagger
+git clone https://github.com/runoobjerry/Manzana-Apple-Music-Tagger-Enhanced.git && cd Manzana-Apple-Music-Tagger-Enhanced
 ```
 
 Install required modules for python (use `pip3` if `pip` doesn't work for you)
